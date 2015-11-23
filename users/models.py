@@ -14,8 +14,14 @@ class Profile(models.Model):
     avatar = models.URLField(blank=True, null=True)
     latitude = models.FloatField()
     longitude = models.FloatField()
-    city = models.CharField(max_length=CITY_MAX_LENGTH)
-    state = models.CharField(max_length=STATE_MAX_LENGTH)
+    city = models.CharField(max_length=CITY_MAX_LENGTH, null=True, blank=True)
+    state = models.CharField(max_length=STATE_MAX_LENGTH, null=True, blank=True)
     sales = models.PositiveIntegerField(default=0)
 
-# TODO: Pre-save para añadirle una latitud y longitud si no nos viene dada
+    # propiedades calculadas
+    full_name = property(lambda Profile: u'%s %s' % (Profile.user.first_name, Profile.user.last_name))
+
+    def __unicode__(self):
+        return self.user.username + ' - ' + self.full_name
+
+# TODO: Añadirle una latitud y longitud si no nos viene dada

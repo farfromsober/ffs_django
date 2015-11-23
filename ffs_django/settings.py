@@ -1,3 +1,4 @@
+#-*- coding: utf-8 -*-
 """
 Django settings for ffs_django project.
 
@@ -37,6 +38,9 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'images',
+    'products',
+    'users',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -85,7 +89,7 @@ DATABASES = {
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es-es'
 
 TIME_ZONE = 'UTC'
 
@@ -100,3 +104,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# Se enviará un correo a estas direcciones en caso de que haya errores en el server
+ADMIN = (
+    ('FFS', 'farfromsober15@gmail.com'),
+)

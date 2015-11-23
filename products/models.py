@@ -10,8 +10,16 @@ from .settings import PRODUCT_NAME_MAX_LENGTH, CATEGORY_NAME_MAX_LENGTH, QUERY_M
 
 
 class Category(models.Model):
+
+    # Ponemos el plural bien, si no saldría Categorys
+    class Meta:
+        verbose_name_plural = 'Categories'
+
     name = models.CharField(max_length=CATEGORY_NAME_MAX_LENGTH)
     index = models.PositiveIntegerField(unique=True)
+
+    def __unicode__(self):
+        return self.name
 
 
 
@@ -28,7 +36,10 @@ class Product(models.Model):
     # al eliminar la categoría lo ponemos a null
     category = models.ForeignKey(Category, null=True, on_delete=models.SET_NULL)
 
-# TODO: Pre-save para actualizar el número de productos vendidos del seller cuando cambie selling
+    def __unicode__(self):
+        return self.name
+
+# TODO: Actualizar el número de productos vendidos del seller cuando cambie selling
 
 
 
@@ -38,7 +49,10 @@ class SavedSearch(models.Model):
     query = models.CharField(max_length=QUERY_MAX_LENGTH)
     user = models.ForeignKey(Profile)
     # al eliminar la categoría lo ponemos a null
-    category = models(Category, null=True, on_delete=models.SET_NULL)
+    category = models.ForeignKey(Category, null=True, on_delete=models.SET_NULL)
+
+    def __unicode__(self):
+        return self.query
 
 # TODO: Decidir si vamos a pasar a minúsculas y quitar los caracteres especiales en el pre-save
 
@@ -50,8 +64,11 @@ class SavedSearch(models.Model):
 class Transaction(models.Model):
 
     product = models.ForeignKey(Product)
-    seller = models.ForeignKey(Profile)
-    buyer = models.ForeignKey(Profile)
+    seller = models.ForeignKey(Profile, related_name='seller')
+    buyer = models.ForeignKey(Profile, related_name='buyer')
     date = models.DateTimeField(auto_now_add=True)
 
+    def __unicode__(self):
+        return self.product.name + u': ' + self.seller.user.username + u' -> ' + self.buyer.user.username
 
+# TODO: Controlar que seller y buyer no son iguales
