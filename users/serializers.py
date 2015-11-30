@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # __author__ = 'gloria'
 from django.contrib.auth import authenticate
+from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
 from rest_framework import serializers
 from users.models import Profile
@@ -9,27 +10,7 @@ from users.models import Profile
 class UserSerializer (serializers.ModelSerializer):
     class Meta:
         model = User
-        read_only_fields = ('id')
 
-class LoginSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields =('username','password')
-
-
-    def validate(self, data):
-        print('********')
-        self.user = authenticate(username=data.get('username'), password=data.get('password'))
-        print('********')
-        print(data.get('username'))
-        print('********')
-        print(self.user)
-        if self.user:
-            if not self.user.is_active:
-                raise serializers.ValidationError('inactive_account')
-            return data
-        else:
-            raise serializers.ValidationError('invalid_credentials')
 
 
 class ProfileSerializer(serializers.ModelSerializer):
@@ -38,15 +19,35 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model=Profile
         fields = ('user','avatar', 'latitude','longitude','city','state','sales')
+        depth =1
 
     def create(self, validated_data):
         user_data = validated_data.pop('user')
         user = User.objects.create(**user_data)
+        user.set_password(user.password)
         profile=Profile.objects.create(user=user, **validated_data)
         return profile
 
+    def update(self, instance,validated_data):
 
+        user_data=validated_data.pop('user')
+        user = instance.user
 
+        user.first_name = user_data.get('first_name')
+        user.last_name = user_data.get('last_name')
+        user.email = user_data.get('email')
+        user.set_password(user_data.get('password'))
+        user.save()
+
+        instance.avatar = validated_data.get('avatar')
+        instance.latitude = validated_data.get('latitude')
+        instance.longitude = validated_data.get('longitude')
+        instance.city = validated_data.get('city')
+        instance.state = validated_data.get('state')
+        instance.sales = validated_data.get('sales')
+        instance.save()
+
+        return instance
 
 
 

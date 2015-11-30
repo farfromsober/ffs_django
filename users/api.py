@@ -7,7 +7,7 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 from users.permissions import UserPermission
-from users.serializers import ProfileSerializer, LoginSerializer
+from users.serializers import ProfileSerializer
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 
@@ -67,28 +67,21 @@ class UserViewSet(GenericViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class FFSBasicAuthentication(BasicAuthentication):
-
-    def authenticate(self, request):
-        user, _ = super(FFSBasicAuthentication, self).authenticate(request)
-        login(request, user)
-        return user
-
-
 class LoginAPIView(APIView):
-
-    serializer_class = LoginSerializer
-
 
     def post(self, request, format=None):
 
-        serializer =LoginSerializer(data=request.data)
+        possible_user = User.objects.filter(username= request.user.username, password= request.user.password, is_active = True)
+        print("************************")
+        print(request.user.username)
+        print(request.user.password)
 
-        if serializer.is_valid():
-            content = {
-                'user': unicode(request.user),
-                'auth': unicode(request.auth),  # None
-            }
-            return Response(content, status=status.HTTP_200_OK)
+        user = possible_user[0] if len(possible_user) > 0 else None
+
+        if user is not None:
+            profile = get_object_or_404(Profile, user=user)
+            serializer = ProfileSerializer(profile)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from django.contrib.auth.hashers import check_password
 from django.test import TestCase
 
 # Create your tests here.
@@ -8,6 +9,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase, APIClient
 from users.models import Profile
 from django.contrib.auth.models import User
+import base64
 
 
 
@@ -108,7 +110,7 @@ class UsersAPITestCase(APITestCase):
         self.assertEqual(response.data['user']['username'], 'testuser3')
         self.assertEqual(response.data['user']['first_name'], 'test')
         self.assertEqual(response.data['user']['last_name'], 'user3')
-        self.assertEqual(response.data['user']['password'], 'testuser3')
+        self.assertTrue(check_password('testuser3',response.data['user']['password']) )
         self.assertEqual(response.data['latitude'], 4.6)
         self.assertEqual(response.data['longitude'], -74.0)
         self.assertEqual(response.data['city'], 'Bogota')
@@ -188,6 +190,7 @@ class LoginTests(APITestCase):
         """
         Ensure we can login with the .
         """
-        data = {'user': 'testuser1', 'password': 'testuser1'}
-        response = self.client.post(self.url, data, format='json')
+        data = base64.b64encode(b'testuser1.testuser1')
+        print (data)
+        response = self.client.post(self.url,{}, format='json', HTTP_AUTHORIZATION= 'Basic dGVzdHVzZXIxLnRlc3R1c2VyMQ==')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
