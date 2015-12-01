@@ -5,7 +5,7 @@ from .api import ProductViewSet
 
 # APIRouter
 router = DefaultRouter()
-router.register(r'products', ProductViewSet, 'products_list_api')
+router.register(r'products', ProductViewSet, base_name='products_list_api')
 
 urlpatterns = [
     # API URLs

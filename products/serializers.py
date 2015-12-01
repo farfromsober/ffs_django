@@ -3,6 +3,7 @@ from .settings import DEFAULT_CATEGORY_INDEX
 from rest_framework import serializers
 from models import Product, Category
 from rest_framework.relations import PrimaryKeyRelatedField
+from users.serializers import ProfileSerializer
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -15,7 +16,7 @@ class CategorySerializer(serializers.ModelSerializer):
 class ProductSerializer(serializers.ModelSerializer):
 
     category = CategorySerializer()
-    #seller = ProfileSerializer()
+    seller = ProfileSerializer()
 
     # TODO: enviar array de imagenes de un producto
 

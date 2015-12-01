@@ -13,8 +13,9 @@ from rest_framework.response import Response
 class ProductViewSet(ProductsQueryset, GenericViewSet):
 
     queryset = Product.objects.all()
+    # pagination_class = PageNumberPagination
     serializer_class = ProductSerializer
-    permission_classes = (ProductPermission,)
+    # permission_classes = (ProductPermission,)
 
     def list(self, request):
         products = self.get_products_queryset(request)
