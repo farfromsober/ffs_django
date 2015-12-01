@@ -21,7 +21,7 @@ class UserViewSet(GenericViewSet):
 
     serializer_class = ProfileSerializer
     # pagination_class = PageNumberPagination
-    # permission_classes = (UserPermission,)
+    permission_classes = (UserPermission,)
     queryset = Profile.objects.all()
 
     def list(self, request):
