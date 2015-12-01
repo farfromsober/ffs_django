@@ -12,4 +12,4 @@ class Image(models.Model):
     url = models.URLField()
 
     def __unicode__(self):
-        return self.product + u' - ' + self.url
+        return self.product.name + u' - ' + self.url
