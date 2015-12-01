@@ -11,7 +11,7 @@ from users.serializers import ProfileSerializer
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 
-from django.contrib.auth import login
+from django.contrib.auth import login, authenticate
 from rest_framework.authentication import BasicAuthentication, SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
@@ -48,7 +48,6 @@ class UserViewSet(GenericViewSet):
 
     def update(self, request, pk):
         user = get_object_or_404(Profile, pk=pk)
-
         #Verificar  si el usuario puede actualizar
         self.check_object_permissions(request, user)
         serializer = ProfileSerializer(instance=user, data=request.data)
@@ -69,19 +68,27 @@ class UserViewSet(GenericViewSet):
 
 class LoginAPIView(APIView):
 
-    def post(self, request, format=None):
+   def post(self, request, format=None):
 
-        possible_user = User.objects.filter(username= request.user.username, password= request.user.password, is_active = True)
-        print("************************")
-        print(request.user.username)
-        print(request.user.password)
+       username = request.data.get("user", None)
+       password = request.data.get("password", None)
 
-        user = possible_user[0] if len(possible_user) > 0 else None
+       if username is not None and password is not None:
 
-        if user is not None:
-            profile = get_object_or_404(Profile, user=user)
-            serializer = ProfileSerializer(profile)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        else:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+           user = authenticate(username=username, password=password)
+
+           if user is not None and user.is_active:
+
+               login(request, user)
+               profile = get_object_or_404(Profile, user=user)
+               serializer = ProfileSerializer(profile)
+               return Response(serializer.data, status=status.HTTP_200_OK)
+
+           else:
+
+               return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+       else:
+
+           return Response(status=status.HTTP_400_BAD_REQUEST)
 

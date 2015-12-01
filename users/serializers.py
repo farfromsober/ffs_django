@@ -28,7 +28,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         profile=Profile.objects.create(user=user, **validated_data)
         return profile
 
-    def update(self, instance,validated_data):
+    def update(self, instance, validated_data):
 
         user_data=validated_data.pop('user')
         user = instance.user

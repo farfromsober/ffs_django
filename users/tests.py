@@ -176,6 +176,7 @@ class LoginTests(APITestCase):
     def setUp(self):
         # Se crean un usuario y su perfil
         user1 = User.objects.create(username='testuser1', password='testuser1', first_name='test', last_name='user1')
+        user1.set_password('testuser1')
         user1.save()
 
         # Se crean dos perfiles
@@ -190,7 +191,6 @@ class LoginTests(APITestCase):
         """
         Ensure we can login with the .
         """
-        data = base64.b64encode(b'testuser1.testuser1')
-        print (data)
-        response = self.client.post(self.url,{}, format='json', HTTP_AUTHORIZATION= 'Basic dGVzdHVzZXIxLnRlc3R1c2VyMQ==')
+        data = {'user':'testuser1','password': 'testuser1'}
+        response = self.client.post(self.url,data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)

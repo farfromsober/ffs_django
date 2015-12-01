@@ -12,6 +12,9 @@ class UserPermission(BasePermission):
         # si no es POST, el superusuario siempre puede
         elif request.user.is_superuser:
             return True
+
+        elif view.action == 'list':
+            return True
         # para los GET al detalle, se delega la decision a has_object_permissions
         elif view.action in ['retrieve', 'update', 'destroy']:
             return True
@@ -27,4 +30,12 @@ class UserPermission(BasePermission):
         """
         # si es superadmin, o el usuario autenticado intenta
         # hacer GET, PUT o DELETE sobre su mismo perfil
-        return request.user.is_superuser or request.user == obj
+
+        if view.action in ['update', 'destroy']:
+            return request.user.is_superuser or request.user == obj
+        elif view.action == 'retrieve':
+            return True
+        else:
+            return False
+
+
