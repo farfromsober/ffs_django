@@ -44,9 +44,17 @@ class ProductListSerializer(ProductSerializer):
         model = Product
 
 
-class ProductCreationSerializer(ProductSerializer):
+class ProductCreateSerializer(ProductSerializer):
 
     category = PrimaryKeyRelatedField(read_only='False')
 
     class Meta(ProductSerializer.Meta):
-        fields = ('name', 'description', 'price', 'category',)
+        fields = ('name', 'description', 'price', 'category')
+
+
+class ProductUpdateSerializer(ProductSerializer):
+
+    category = PrimaryKeyRelatedField(read_only='False')
+
+    class Meta(ProductSerializer.Meta):
+        fields = ('name', 'description', 'price', 'category', 'selling')

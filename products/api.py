@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.generics import get_object_or_404
 from rest_framework.viewsets import GenericViewSet
 from users.models import Profile
-from .serializers import ProductSerializer, ProductCreationSerializer, ProductListSerializer
+from .serializers import ProductSerializer, ProductCreateSerializer, ProductListSerializer, ProductUpdateSerializer
 from .models import Product, Category
 from rest_framework.response import Response
 
@@ -22,7 +22,7 @@ class ProductViewSet(GenericViewSet):
         return Response(serializer.data)
 
     def create(self, request):
-        serializer = ProductCreationSerializer(data=request.data)
+        serializer = ProductCreateSerializer(data=request.data)
         if serializer.is_valid():
             category = get_object_or_404(Category, index=request.data.get('category', dict())
                                                                      .get('index', DEFAULT_CATEGORY_INDEX))
@@ -41,11 +41,12 @@ class ProductViewSet(GenericViewSet):
     def update(self, request, pk):
         product = get_object_or_404(Product, pk=pk)
         self.check_object_permissions(request, product)  # compruebo si el usuario autenticado puede hacer PUT en este product
-        serializer = ProductCreationSerializer(instance=product, data=request.data)
+        serializer = ProductUpdateSerializer(instance=product, data=request.data)
         if serializer.is_valid():
             seller = get_object_or_404(Profile, user=request.user)
-            serializer.save(seller=seller)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            product = serializer.save(seller=seller)
+            response_serializer = ProductListSerializer(product)
+            return Response(response_serializer.data, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
