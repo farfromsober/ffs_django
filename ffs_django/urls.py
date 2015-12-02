@@ -27,5 +27,5 @@ urlpatterns = [
     url(r'api/', include(users_api_urls)),
 
     # Products URLs
-    url(r'^api/', include(products_api_urls)),
+    url(r'api/', include(products_api_urls)),
 ]

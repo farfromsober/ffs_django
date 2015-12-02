@@ -1,9 +1,17 @@
 # -*- coding: utf-8 -*-
-from .settings import DEFAULT_CATEGORY_INDEX
 from rest_framework import serializers
 from models import Product, Category
 from rest_framework.relations import PrimaryKeyRelatedField
 from users.serializers import ProfileSerializer
+
+
+class StringToFloatField(serializers.Field):
+
+    def to_representation(self, value):
+        return str(value)
+
+    def to_internal_value(self, data):
+        return float(data)
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -17,6 +25,8 @@ class ProductSerializer(serializers.ModelSerializer):
 
     category = CategorySerializer()
     seller = ProfileSerializer()
+    price = StringToFloatField()
+    id = StringToFloatField()
 
     # TODO: enviar array de imagenes de un producto
 
@@ -26,15 +36,6 @@ class ProductSerializer(serializers.ModelSerializer):
 
 class ProductListSerializer(ProductSerializer):
 
-    price = serializers.SerializerMethodField('price_string')
-    id = serializers.SerializerMethodField('id_string')
-
-    def price_string(self, obj):
-        return '{0}'.format(obj.price)
-
-    def id_string(self, obj):
-        return '{0}'.format(obj.id)
-
     class Meta:
         model = Product
 
@@ -43,17 +44,5 @@ class ProductCreationSerializer(ProductSerializer):
 
     category = PrimaryKeyRelatedField(read_only='False')
 
-    # class Meta(ProductSerializer.Meta):
-    #     fields = ('id', 'name', 'description', 'price', 'category',)
-
-    @staticmethod
-    def category_index(data):
-        if isinstance(data, dict):
-            index_received = data.get('index')
-            if not index_received == None:
-                index = index_received
-            else:
-                 index = DEFAULT_CATEGORY_INDEX
-        else:
-            index = DEFAULT_CATEGORY_INDEX
-        return index
+    class Meta(ProductSerializer.Meta):
+        fields = ('name', 'description', 'price', 'category',)

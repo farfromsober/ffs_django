@@ -116,11 +116,9 @@ class ProductsAPITestCase(APITestCase):
             "name": "Producto 3",
             "description": "Descripcion de producto 3"
         }
-        auth_headers = {
-            'HTTP_AUTHORIZATION': 'Basic ' + base64.b64encode('testuser1:testuser1'.encode()).decode(),
-        }
+        self.client.login(username='testuser1', password='testuser1')
 
-        response = self.client.post('/api/1.0/products/', data=post_data, format='json', **auth_headers)
+        response = self.client.post('/api/1.0/products/', data=post_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['name'], 'Producto 3')
         self.assertEqual(response.data['description'], 'Descripcion producto 3')

@@ -1,18 +1,17 @@
 # -*- coding: utf-8 -*-
 from .permissions import ProductPermission
+from products.settings import DEFAULT_CATEGORY_INDEX
 from rest_framework import status
 from rest_framework.generics import get_object_or_404
 from rest_framework.viewsets import GenericViewSet
 from users.models import Profile
-from .views import ProductsQueryset
 from .serializers import ProductSerializer, ProductCreationSerializer, ProductListSerializer
 from .models import Product, Category
 from rest_framework.response import Response
 
 
-class ProductViewSet(ProductsQueryset, GenericViewSet):
+class ProductViewSet(GenericViewSet):
 
-    queryset = Product.objects.all()
     # pagination_class = PageNumberPagination
     serializer_class = ProductSerializer
     # permission_classes = (ProductPermission,)
@@ -25,11 +24,9 @@ class ProductViewSet(ProductsQueryset, GenericViewSet):
     def create(self, request):
         serializer = ProductCreationSerializer(data=request.data)
         if serializer.is_valid():
-            # 'category' selection with static method to get the index
-            category = get_object_or_404(Category, index=ProductCreationSerializer.category_index(request.data.get('category')))
-            # 'seller' from the request user
-            seller = get_object_or_404(Profile, user=request.user)
-            serializer.save(seller=seller, category=category)
+            category = get_object_or_404(Category, index=request.data.get('category', dict())
+                                                                     .get('index', DEFAULT_CATEGORY_INDEX))
+            serializer.save(seller=request.user.profile, category=category)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -59,3 +56,17 @@ class ProductViewSet(ProductsQueryset, GenericViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    def get_products_queryset(self, request):
+        # gestion del filtro por categorias
+        category_index = request.query_params.get('category', None)
+        if category_index is not None:
+            category = get_object_or_404(Category, index=category_index)
+            products = Product.objects.filter(category=category).order_by('-published_date', 'id')
+        else:
+            products = Product.objects.order_by('-published_date', 'id')
+        return products
+
+    def get_categories_queryset(self, request):
+        categories = Category.objects.order_by('index')
+        return categories
