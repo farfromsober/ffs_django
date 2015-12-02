@@ -62,9 +62,9 @@ class ProductViewSet(GenericViewSet):
         category_index = request.query_params.get('category', None)
         if category_index is not None:
             category = get_object_or_404(Category, index=category_index)
-            products = Product.objects.filter(category=category).order_by('-published_date', 'id')
+            products = Product.objects.prefetch_related('images').filter(category=category).order_by('-published_date', 'id')
         else:
-            products = Product.objects.order_by('-published_date', 'id')
+            products = Product.objects.prefetch_related('images').order_by('-published_date', 'id')
         return products
 
     def get_categories_queryset(self, request):
