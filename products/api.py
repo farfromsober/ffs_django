@@ -14,7 +14,7 @@ class ProductViewSet(GenericViewSet):
 
     # pagination_class = PageNumberPagination
     serializer_class = ProductSerializer
-    # permission_classes = (ProductPermission,)
+    permission_classes = (ProductPermission,)
 
     def list(self, request):
         products = self.get_products_queryset(request)
@@ -26,8 +26,9 @@ class ProductViewSet(GenericViewSet):
         if serializer.is_valid():
             category = get_object_or_404(Category, index=request.data.get('category', dict())
                                                                      .get('index', DEFAULT_CATEGORY_INDEX))
-            serializer.save(seller=request.user.profile, category=category)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            product = serializer.save(seller=request.user.profile, category=category)
+            response_serializer = ProductListSerializer(product)
+            return Response(response_serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

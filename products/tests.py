@@ -1,25 +1,23 @@
 # -*- coding: utf-8 -*-
 from django.contrib.auth.models import User
-from django.test import TestCase
 from products.models import Product, Category
 from rest_framework import status
 from users.models import Profile
-import base64
 
 # Create your tests here.
 from rest_framework.test import APITestCase
 
 
 class ProductsAPITestCase(APITestCase):
+
+    username = 'testuser1'
+    password = 'testuser1'
+
     def setUp(self):
-        # username = 'testuser1'
-        # password = 'testuser1'
-        # credentials = base64.b64encode(username + ':' + password)
-        # self.client.defaults['HTTP_AUTHORIZATION'] = 'Basic ' + credentials
 
         # Se crean dos usuarios para asociarlos a dos perfiles
-        user1 = User.objects.create(username='testuser1', password='testuser1', first_name='test', last_name='user1')
-        user2 = User.objects.create(username='testuser2', password='testuser2', first_name='test', last_name='user2')
+        user1 = User.objects.create_user(username='testuser1', password='testuser1', first_name='test', last_name='user1')
+        user2 = User.objects.create_user(username='testuser2', password='testuser2', first_name='test', last_name='user2')
         user1.save()
         user2.save()
 
@@ -57,11 +55,15 @@ class ProductsAPITestCase(APITestCase):
         product1.save()
         product2.save()
 
+    def _require_login(self, username, password):
+        self.client.login(username=username, password=password)
+
     def test_list_products(self):
         """
         Prueba que se devuelva completa la lista de productos
         :return:
         """
+        self._require_login(self.username, self.password)
         response = self.client.get('/api/1.0/products/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data[0]['name'], 'Producto 2')
@@ -72,6 +74,7 @@ class ProductsAPITestCase(APITestCase):
         Prueba que se devuelva uno de los productos
         :return:
         """
+        self._require_login(self.username, self.password)
         response = self.client.get('/api/1.0/products/1/')
         self.assertEqual(response.data['name'], 'Producto 1')
         self.assertEqual(response.data['description'], 'Descripcion producto 1')
@@ -95,6 +98,7 @@ class ProductsAPITestCase(APITestCase):
         Prueba que se devuelva elimine un producto
         :return:
         """
+        self._require_login(self.username, self.password)
         response = self.client.delete('/api/1.0/products/1/')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
@@ -107,6 +111,7 @@ class ProductsAPITestCase(APITestCase):
         Prueba que se agregue un usuario que no existe
         :return:
         """
+        self._require_login(self.username, self.password)
         post_data = {
             "category": {
               "name": "deportes",
@@ -116,12 +121,11 @@ class ProductsAPITestCase(APITestCase):
             "name": "Producto 3",
             "description": "Descripcion de producto 3"
         }
-        self.client.login(username='testuser1', password='testuser1')
 
         response = self.client.post('/api/1.0/products/', data=post_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['name'], 'Producto 3')
-        self.assertEqual(response.data['description'], 'Descripcion producto 3')
+        self.assertEqual(response.data['description'], 'Descripcion de producto 3')
         self.assertEqual(response.data['selling'], True)
         self.assertEqual(response.data['price'], '4500.0')
         self.assertEqual(response.data['seller']['user']['username'], 'testuser1')
