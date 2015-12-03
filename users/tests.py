@@ -17,8 +17,8 @@ import base64
 class UsersAPITestCase(APITestCase):
     def setUp(self):
         # Se cran dos usuarios para asociarlos a dos perfiles
-        user1 = User.objects.create(username='testuser1', password='testuser1', first_name='test', last_name='user1')
-        user2 = User.objects.create(username='testuser2', password='testuser2', first_name='test', last_name='user2')
+        user1 = User.objects.create_user(username='testuser1', password='testuser1', first_name='test', last_name='user1')
+        user2 = User.objects.create_user(username='testuser2', password='testuser2', first_name='test', last_name='user2')
         user1.save()
         user2.save()
 
@@ -52,7 +52,6 @@ class UsersAPITestCase(APITestCase):
         self.assertEqual(response.data['user']['username'], 'testuser1')
         self.assertEqual(response.data['user']['first_name'], 'test')
         self.assertEqual(response.data['user']['last_name'], 'user1')
-        self.assertEqual(response.data['user']['password'], 'testuser1')
         self.assertEqual(response.data['latitude'], 4.0)
         self.assertEqual(response.data['longitude'], 4.0)
         self.assertEqual(response.data['city'], 'boston')
@@ -64,7 +63,6 @@ class UsersAPITestCase(APITestCase):
         self.assertEqual(response.data['user']['username'], 'testuser2')
         self.assertEqual(response.data['user']['first_name'], 'test')
         self.assertEqual(response.data['user']['last_name'], 'user2')
-        self.assertEqual(response.data['user']['password'], 'testuser2')
         self.assertEqual(response.data['latitude'], 4.0)
         self.assertEqual(response.data['longitude'], 4.0)
         self.assertEqual(response.data['city'], 'boston')
@@ -77,12 +75,15 @@ class UsersAPITestCase(APITestCase):
         Prueba que se devuelva elimine un usuario
         :return:
         """
+        self.client.login(username='testuser1', password='testuser1')
         response = self.client.delete('/api/1.0/users/1/')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
 
         response = self.client.get('/api/1.0/users/1/')
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.client.logout
 
     def test_add_new_user(self):
         """
@@ -149,8 +150,8 @@ class UsersAPITestCase(APITestCase):
 
         post_data = {
             'avatar': 'https://pixabay.com/es/diablo-rojo-bifurcaci%C3%B3n-de-la-echada-963136/',
-            'latitude': '4.6',
-            'longitude': '-74.0',
+            'latitude': 4.6,
+            'longitude': -74.0,
             'city': 'Bogota',
             'state': 'Cundinamarca',
             'sales': 0,
@@ -161,7 +162,7 @@ class UsersAPITestCase(APITestCase):
                 'last_name': 'user2updated',
             }
         }
-
+        self.client.login(username='testuser2', password='testuser2')
         response = self.client.put('/api/1.0/users/2/',data=post_data, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -169,7 +170,7 @@ class UsersAPITestCase(APITestCase):
         response = self.client.get('/api/1.0/users/2/')
         self.assertEqual(response.data['user']['first_name'], 'testupdated')
         self.assertEqual(response.data['user']['last_name'], 'user2updated')
-
+        self.client.logout()
 
 class LoginTests(APITestCase):
 
