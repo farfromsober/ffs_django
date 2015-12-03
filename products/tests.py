@@ -88,6 +88,7 @@ class ProductsAPITestCase(APITestCase):
         self._require_login(self.username, self.password)
         response = self.client.get('/api/1.0/products/?category=1')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data.__len__(), 1)
         self.assertEqual(response.data[0]['name'], 'Producto 2')
         self.assertEqual(response.data[0]['description'], 'Descripcion producto 2')
 

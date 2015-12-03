@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from .permissions import ProductPermission
-from products.settings import DEFAULT_CATEGORY_INDEX
+from .filters import ProductsFilter
+from rest_framework.filters import DjangoFilterBackend, BaseFilterBackend
+from .settings import DEFAULT_CATEGORY_INDEX
 from rest_framework import status
 from rest_framework.generics import get_object_or_404
 from rest_framework.viewsets import GenericViewSet
@@ -12,13 +14,16 @@ from rest_framework.response import Response
 
 class ProductViewSet(GenericViewSet):
 
+    queryset = Product.objects.prefetch_related('images').order_by('-published_date', 'id')
     # pagination_class = PageNumberPagination
     serializer_class = ProductSerializer
     permission_classes = (ProductPermission,)
+    filter_class = ProductsFilter
 
     def list(self, request):
-        products = self.get_products_queryset(request)
-        serializer = ProductListSerializer(products, many=True)
+        # products = self.get_products_queryset(request)
+        products = self.filter_class(request.query_params, queryset=self.queryset)
+        serializer = ProductListSerializer(products.qs, many=True)
         return Response(serializer.data)
 
     def create(self, request):

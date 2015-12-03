@@ -149,8 +149,8 @@ class UsersAPITestCase(APITestCase):
 
         post_data = {
             'avatar': 'https://pixabay.com/es/diablo-rojo-bifurcaci%C3%B3n-de-la-echada-963136/',
-            'latitude': '4.6',
-            'longitude': '-74.0',
+            'latitude': 4.6,
+            'longitude': -74.0,
             'city': 'Bogota',
             'state': 'Cundinamarca',
             'sales': 0,
