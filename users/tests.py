@@ -1,22 +1,19 @@
 # -*- coding: utf-8 -*-
 from django.contrib.auth.hashers import check_password
-from django.test import TestCase
 
-# Create your tests here.
 
-from django.core.urlresolvers import reverse
 from rest_framework import status
-from rest_framework.test import APITestCase, APIClient
+from rest_framework.test import APITestCase
 from users.models import Profile
 from django.contrib.auth.models import User
-import base64
+
 
 
 
 
 class UsersAPITestCase(APITestCase):
     def setUp(self):
-        # Se cran dos usuarios para asociarlos a dos perfiles
+        # Se crean dos usuarios para asociarlos a dos perfiles
         user1 = User.objects.create_user(username='testuser1', password='testuser1', first_name='test', last_name='user1')
         user2 = User.objects.create_user(username='testuser2', password='testuser2', first_name='test', last_name='user2')
         user1.save()
@@ -52,8 +49,8 @@ class UsersAPITestCase(APITestCase):
         self.assertEqual(response.data['user']['username'], 'testuser1')
         self.assertEqual(response.data['user']['first_name'], 'test')
         self.assertEqual(response.data['user']['last_name'], 'user1')
-        self.assertEqual(response.data['latitude'], 4.0)
-        self.assertEqual(response.data['longitude'], 4.0)
+        self.assertEqual(response.data['latitude'], '4.0')
+        self.assertEqual(response.data['longitude'], '4.0')
         self.assertEqual(response.data['city'], 'boston')
         self.assertEqual(response.data['state'], 'cund')
         self.assertEqual(response.data['sales'], 0)
@@ -63,8 +60,8 @@ class UsersAPITestCase(APITestCase):
         self.assertEqual(response.data['user']['username'], 'testuser2')
         self.assertEqual(response.data['user']['first_name'], 'test')
         self.assertEqual(response.data['user']['last_name'], 'user2')
-        self.assertEqual(response.data['latitude'], 4.0)
-        self.assertEqual(response.data['longitude'], 4.0)
+        self.assertEqual(response.data['latitude'], '4.0')
+        self.assertEqual(response.data['longitude'], '4.0')
         self.assertEqual(response.data['city'], 'boston')
         self.assertEqual(response.data['state'], 'cund')
         self.assertEqual(response.data['sales'], 0)
@@ -112,8 +109,8 @@ class UsersAPITestCase(APITestCase):
         self.assertEqual(response.data['user']['first_name'], 'test')
         self.assertEqual(response.data['user']['last_name'], 'user3')
         self.assertTrue(check_password('testuser3',response.data['user']['password']) )
-        self.assertEqual(response.data['latitude'], 4.6)
-        self.assertEqual(response.data['longitude'], -74.0)
+        self.assertEqual(response.data['latitude'], '4.6')
+        self.assertEqual(response.data['longitude'], '-74.0')
         self.assertEqual(response.data['city'], 'Bogota')
         self.assertEqual(response.data['state'], 'Cundinamarca')
         self.assertEqual(response.data['sales'], 0)
@@ -144,20 +141,20 @@ class UsersAPITestCase(APITestCase):
 
     def test_update_existent_user(self):
         """
-        Prueba que no se pueda actualizar un usuario que ya existe
+        Prueba que  se pueda actualizar un usuario que ya existe
         :return:
         """
 
         post_data = {
             'avatar': 'https://pixabay.com/es/diablo-rojo-bifurcaci%C3%B3n-de-la-echada-963136/',
-            'latitude': 4.6,
-            'longitude': -74.0,
+            'latitude': '4.6',
+            'longitude': '-74.0',
             'city': 'Bogota',
             'state': 'Cundinamarca',
             'sales': 0,
             'user': {
-                'password': 'testuser2',
                 'username': 'testuser2',
+                'password' : 'testuser2',
                 'first_name': 'testupdated',
                 'last_name': 'user2updated',
             }

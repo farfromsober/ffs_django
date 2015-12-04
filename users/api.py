@@ -2,18 +2,15 @@
 from users.models import Profile
 
 __author__ = 'gloria'
-from django.contrib.auth.models import User
-from rest_framework.pagination import PageNumberPagination
+
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 from users.permissions import UserPermission
-from users.serializers import ProfileSerializer
+from users.serializers import ProfileSerializer, ProfileUpdateSerializer
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 
 from django.contrib.auth import login, authenticate
-from rest_framework.authentication import BasicAuthentication, SessionAuthentication
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
 
@@ -47,10 +44,10 @@ class UserViewSet(GenericViewSet):
         return Response(serializer.data)
 
     def update(self, request, pk):
-        user = get_object_or_404(Profile, pk=pk)
+        profile = get_object_or_404(Profile, pk=pk)
         #Verificar  si el usuario puede actualizar
-        self.check_object_permissions(request, user)
-        serializer = ProfileSerializer(instance=user, data=request.data)
+        self.check_object_permissions(request, profile)
+        serializer = ProfileUpdateSerializer(instance=profile, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -64,6 +61,7 @@ class UserViewSet(GenericViewSet):
         self.check_object_permissions(request, user)
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 
 class LoginAPIView(APIView):
