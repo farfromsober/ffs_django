@@ -24,15 +24,15 @@ class ProductsAPITestCase(APITestCase):
         self.user2.save()
 
         # Se crean dos perfiles
-        profile1 = Profile.objects.create(user=self.user1,
-                                          avatar='http://cdn.redmondpie.com/wp-content/uploads/2011/07/Avatar.png',
-                                          latitude='4.0', longitude='4.0', city='boston', state='cund', sales='0')
-        profile2 = Profile.objects.create(user=self.user2,
-                                          avatar='https://pixabay.com/es/especies-exóticas-flor-avatar-978415/',
-                                          latitude='4.0', longitude='4.0', city='boston', state='cund', sales='0')
+        self.profile1 = Profile.objects.create(user=self.user1,
+                                               avatar='http://cdn.redmondpie.com/wp-content/uploads/2011/07/Avatar.png',
+                                               latitude='4.0', longitude='4.0', city='boston', state='cund', sales='0')
+        self.profile2 = Profile.objects.create(user=self.user2,
+                                               avatar='https://pixabay.com/es/especies-exóticas-flor-avatar-978415/',
+                                               latitude='4.0', longitude='4.0', city='boston', state='cund', sales='0')
 
-        profile1.save()
-        profile2.save()
+        self.profile1.save()
+        self.profile2.save()
 
         # Se crean dos categorias
         category1 = Category.objects.create(name='general',
@@ -47,12 +47,12 @@ class ProductsAPITestCase(APITestCase):
         self.product1 = Product.objects.create(name='Producto 1',
                                                description='Descripcion producto 1',
                                                price=24,
-                                               seller=profile1,
+                                               seller=self.profile1,
                                                category=category1)
         self.product2 = Product.objects.create(name='Producto 2',
                                                description='Descripcion producto 2',
                                                price=312,
-                                               seller=profile2,
+                                               seller=self.profile2,
                                                category=category2,
                                                selling=False)
         self.product1.save()
@@ -186,6 +186,8 @@ class ProductsAPITestCase(APITestCase):
         Prueba que se agregue un producto que no existe
         :return:
         """
+        init_sales = self.profile1.sales
+
         self._require_login(self.username, self.password)
         post_data = {
             "category": {
@@ -205,6 +207,7 @@ class ProductsAPITestCase(APITestCase):
         self.assertEqual(response.data['selling'], True)
         self.assertEqual(response.data['price'], '4500.0')
         self.assertEqual(response.data['seller']['user']['username'], self.username)
+        self.assertEqual(response.data['seller']['sales'], float(init_sales)+1)
         self.assertEqual(response.data['category']['name'], 'deportes')
 
     def test_update_product_without_authentication(self):
