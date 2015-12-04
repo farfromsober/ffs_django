@@ -12,6 +12,8 @@ class ProductsAPITestCase(APITestCase):
 
     username = 'testuser1'
     password = 'testuser1'
+    username2 = 'testuser2'
+    password2 = 'testuser2'
 
     def setUp(self):
 
@@ -26,10 +28,10 @@ class ProductsAPITestCase(APITestCase):
         # Se crean dos perfiles
         self.profile1 = Profile.objects.create(user=self.user1,
                                                avatar='http://cdn.redmondpie.com/wp-content/uploads/2011/07/Avatar.png',
-                                               latitude='4.0', longitude='4.0', city='boston', state='cund', sales='0')
+                                               latitude='4.0', longitude='4.0', city='boston', state='cund', sales='1')
         self.profile2 = Profile.objects.create(user=self.user2,
                                                avatar='https://pixabay.com/es/especies-exóticas-flor-avatar-978415/',
-                                               latitude='4.0', longitude='4.0', city='boston', state='cund', sales='0')
+                                               latitude='4.0', longitude='4.0', city='boston', state='cund', sales='1')
 
         self.profile1.save()
         self.profile2.save()
@@ -157,11 +159,14 @@ class ProductsAPITestCase(APITestCase):
         :return:
         """
         self._require_login(self.username, self.password)
+        profile1 = Profile.objects.get(user=self.user1)
+        initial_sales = profile1.sales
         response = self.client.delete('/api/1.0/products/1/')
+        profile1 = Profile.objects.get(user=self.user1)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(profile1.sales, float(initial_sales)-1)
 
         response = self.client.get('/api/1.0/products/1/')
-
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_add_new_product_without_authentication(self):
@@ -186,7 +191,7 @@ class ProductsAPITestCase(APITestCase):
         Prueba que se agregue un producto que no existe
         :return:
         """
-        init_sales = self.profile1.sales
+        initial_sales = self.profile1.sales
 
         self._require_login(self.username, self.password)
         post_data = {
@@ -207,7 +212,7 @@ class ProductsAPITestCase(APITestCase):
         self.assertEqual(response.data['selling'], True)
         self.assertEqual(response.data['price'], '4500.0')
         self.assertEqual(response.data['seller']['user']['username'], self.username)
-        self.assertEqual(response.data['seller']['sales'], float(init_sales)+1)
+        self.assertEqual(response.data['seller']['sales'], float(initial_sales)+1)
         self.assertEqual(response.data['category']['name'], 'deportes')
 
     def test_update_product_without_authentication(self):
@@ -248,12 +253,37 @@ class ProductsAPITestCase(APITestCase):
         response = self.client.put('/api/1.0/products/2/', data=post_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
-    def test_update_product(self):
+    def test_update_product_to_not_selling(self):
         """
         Prueba que se agregue un producto que no existe
         :return:
         """
         self._require_login(self.username, self.password)
+        post_data = {
+            "category": {
+                "name": "deportes",
+                "index": 1
+            },
+            "name": "Producto 1 modified",
+            "description": "Descripcion de producto 1 modified",
+            "selling": False,
+            "price": 60,
+        }
+
+        response = self.client.put('/api/1.0/products/1/', data=post_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['name'], 'Producto 1 modified')
+        self.assertEqual(response.data['description'], 'Descripcion de producto 1 modified')
+        self.assertEqual(response.data['selling'], False)
+        self.assertEqual(response.data['price'], '60.0')
+        self.assertEqual(response.data['category']['name'], 'deportes')
+
+    def test_update_product_to_selling(self):
+        """
+        Prueba que se agregue un producto que no existe
+        :return:
+        """
+        self._require_login(self.username2, self.password2)
         post_data = {
             "category": {
                 "name": "general",
@@ -265,7 +295,7 @@ class ProductsAPITestCase(APITestCase):
             "price": 20,
         }
 
-        response = self.client.put('/api/1.0/products/1/', data=post_data, format='json')
+        response = self.client.put('/api/1.0/products/2/', data=post_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['name'], 'Producto 2 modified')
         self.assertEqual(response.data['description'], 'Descripcion de producto 2 modified')

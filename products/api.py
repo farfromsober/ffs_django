@@ -30,8 +30,8 @@ class ProductViewSet(GenericViewSet):
             category = get_object_or_404(Category, index=request.data.get('category', dict())
                                                                      .get('index', DEFAULT_CATEGORY_INDEX))
 
-            sales = request.user.profile.sales + 1
-            request.user.profile.sales = sales
+            new_sales = request.user.profile.sales + 1
+            request.user.profile.sales = new_sales
             request.user.profile.save()
             product = serializer.save(seller=request.user.profile, category=category)
             response_serializer = ProductListSerializer(product)
@@ -50,8 +50,9 @@ class ProductViewSet(GenericViewSet):
         self.check_object_permissions(request, product)  # compruebo si el usuario autenticado puede hacer PUT en este product
         serializer = ProductUpdateSerializer(instance=product, data=request.data)
         if serializer.is_valid():
+            category = get_object_or_404(Category, index=request.data.get('category', dict()).get('index'))
             seller = get_object_or_404(Profile, user=request.user)
-            product = serializer.save(seller=seller)
+            product = serializer.save(seller=seller, category=category)
             response_serializer = ProductListSerializer(product)
             return Response(response_serializer.data, status=status.HTTP_200_OK)
         else:
@@ -61,24 +62,24 @@ class ProductViewSet(GenericViewSet):
         product = get_object_or_404(Product, pk=pk)
         self.check_object_permissions(request, product)  # compruebo si el usuario autenticado puede hacer DELETE en este product
         if product.selling:
-            # sales = request.user.profile.sales + 1
-            # request.user.profile.sales = sales
-            # request.user.profile.save()
+            new_sales = request.user.profile.sales - 1
+            request.user.profile.sales = new_sales
+            request.user.profile.save()
             product.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
-    def get_products_queryset(self, request):
-        # gestion del filtro por categorias
-        category_index = request.query_params.get('category', None)
-        if category_index is not None:
-            category = get_object_or_404(Category, index=category_index)
-            products = Product.objects.prefetch_related('images').filter(category=category).order_by('-published_date', 'id')
-        else:
-            products = Product.objects.prefetch_related('images').order_by('-published_date', 'id')
-        return products
+    # def get_products_queryset(self, request):
+    #     # gestion del filtro por categorias
+    #     category_index = request.query_params.get('category', None)
+    #     if category_index is not None:
+    #         category = get_object_or_404(Category, index=category_index)
+    #         products = Product.objects.prefetch_related('images').filter(category=category).order_by('-published_date', 'id')
+    #     else:
+    #         products = Product.objects.prefetch_related('images').order_by('-published_date', 'id')
+    #     return products
 
-    def get_categories_queryset(self, request):
-        categories = Category.objects.order_by('index')
-        return categories
+    # def get_categories_queryset(self, request):
+    #     categories = Category.objects.order_by('index')
+    #     return categories
