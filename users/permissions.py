@@ -32,7 +32,7 @@ class UserPermission(BasePermission):
         # hacer GET, PUT o DELETE sobre su mismo perfil
 
         if view.action in ['update', 'destroy']:
-            return request.user.is_superuser or request.user == obj
+            return request.user.is_superuser or request.user == obj.user
         elif view.action == 'retrieve':
             return True
         else:

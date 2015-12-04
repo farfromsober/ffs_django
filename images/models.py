@@ -8,8 +8,8 @@ from products.models import Product
 
 class Image(models.Model):
 
-    product = models.ForeignKey(Product)
+    product = models.ForeignKey(Product, related_name='images')
     url = models.URLField()
 
     def __unicode__(self):
-        return self.product + u' - ' + self.url
+        return self.product.name + u' - ' + self.url

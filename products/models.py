@@ -7,8 +7,6 @@ from users.models import Profile
 from .settings import PRODUCT_NAME_MAX_LENGTH, CATEGORY_NAME_MAX_LENGTH, QUERY_MAX_LENGTH
 
 
-
-
 class Category(models.Model):
 
     # Ponemos el plural bien, si no saldría Categorys
@@ -20,10 +18,6 @@ class Category(models.Model):
 
     def __unicode__(self):
         return self.name
-
-
-
-
 
 class Product(models.Model):
 
@@ -41,9 +35,6 @@ class Product(models.Model):
 
 # TODO: Actualizar el número de productos vendidos del seller cuando cambie selling
 
-
-
-
 class SavedSearch(models.Model):
 
     query = models.CharField(max_length=QUERY_MAX_LENGTH)
@@ -55,11 +46,6 @@ class SavedSearch(models.Model):
         return self.query
 
 # TODO: Decidir si vamos a pasar a minúsculas y quitar los caracteres especiales en el pre-save
-
-
-
-
-
 
 class Transaction(models.Model):
 
