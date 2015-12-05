@@ -27,6 +27,10 @@ class ProductPermission(BasePermission):
         elif view.action in ['update', 'destroy']:
             return True
 
+        # el cliente web pide primero con el método options lo que puede hacer, damos permiso siempre
+        elif view.action == 'metadata':
+            return True
+
         # resto de casos
         else:
             return False
