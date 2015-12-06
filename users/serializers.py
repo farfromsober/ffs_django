@@ -19,6 +19,11 @@ class StringToFloatField(serializers.Field):
 class UserSerializer (serializers.ModelSerializer):
     class Meta:
         model = User
+        fields = ('id','username','password','first_name', 'last_name','email')
+
+class UserListSerializer (UserSerializer):
+    class Meta(UserSerializer.Meta):
+        fields = ('id','username','first_name', 'last_name','email')
 
 
 
@@ -40,6 +45,8 @@ class ProfileSerializer(serializers.ModelSerializer):
         return profile
 
 
+
+
 class ProfileUpdateSerializer(ProfileSerializer):
 
     user = PrimaryKeyRelatedField(queryset=User.objects.all())
@@ -48,6 +55,6 @@ class ProfileUpdateSerializer(ProfileSerializer):
         fields=('user','avatar','latitude','longitude','city','state','sales')
 
 class ProfileListSerializer(ProfileSerializer):
+    user = UserListSerializer()
     class Meta (ProfileSerializer.Meta):
         fields=('user','avatar','latitude','longitude','city','state','sales')
-        depth = 1
