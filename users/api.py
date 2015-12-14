@@ -63,7 +63,6 @@ class UserViewSet(GenericViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-
 class LoginAPIView(APIView):
 
    def post(self, request, format=None):
