@@ -2,33 +2,66 @@
 #__author__ = 'dregatos'
 
 from rest_framework import serializers
-from rest_framework.relations import PrimaryKeyRelatedField
 
 from models import Image
-from products.serializers import ProductSerializer
+from products.models import Product
 
+class ImageCreateSerializer(serializers.Serializer):
 
-class StringToFloatField(serializers.Field):
+    productId = serializers.IntegerField()
+    urls = serializers.ListField(
+        child=serializers.URLField()
+    )
 
-    def to_representation(self, value):
-        return str(value)
+    def validate_productId(self, value):
+        """
+        Check:
+               1. format
+               2. a product exists with this id
+               3. that product belongs to request.user
+        """
+        try:
+            int(value)
+        except:
+            raise serializers.ValidationError("Invalid format on productId")
 
-    def to_internal_value(self, data):
-        return float(data)
+        product = Product.objects.get(pk=value)
+        if product is None:
+            raise serializers.ValidationError("Invalid productId")
 
+        user = self.context.get('user')
+        if product.seller.user != user:
+            raise serializers.ValidationError("You don't have permission to modify that product")
 
-class ImageSerializer(serializers.ModelSerializer):
+        return value
 
-    product = ProductSerializer()
-    #urls = 'handle' url array
+    def create(self, validated_data):
+        product = Product.objects.get(pk=validated_data.get('productId'))
+        for url in validated_data.get('urls'):
+            Image.objects.create(product=product, url=url)
+        return product
 
-    class Meta:
-        model = Image
+class ImageDestroySerializer(serializers.Serializer):
 
+    url = serializers.URLField()
 
-class ImageCreateSerializer(ImageSerializer):
+    def validate_url(self, value):
+        """
+        Check:
+               1. image exists
+               2. that image belongs to request.user
+        """
+        image = Image.objects.get(url=value)
+        if image is None:
+          raise serializers.ValidationError("Unknown url")
 
-    product = PrimaryKeyRelatedField(read_only='False')
+        user = self.context.get('user')
+        if image.product.seller.user != user:
+            raise serializers.ValidationError("You don't have permission to modify that product")
 
-    class Meta:
-        model = Image
+        return value
+
+    def create(self, validated_data):
+        image = Image.objects.get(url=validated_data.get('url'))
+        image.delete()
+

@@ -3,41 +3,51 @@
 from rest_framework import status
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.response import Response
+from rest_framework.generics import get_object_or_404
 
-from images.serializers import ImageSerializer, ImageCreateSerializer
-from products.serializers import ProductListSerializer
+from images.permissions import ImagePermission
+from images.serializers import ImageCreateSerializer, ImageDestroySerializer
 from products.models import Product
+from products.serializers import ProductListSerializer
 from .models import Image
-from django.shortcuts import get_object_or_404
 
 
 class ImageViewSet(GenericViewSet):
 
     queryset = Image.objects.all()
-    serializer_class = ImageSerializer  # default one
-    #permission_classes = (ImagePermission,)
+    permission_classes = (ImagePermission,)
+
+    # sobreescribimos este método para especificar distintos serializers
+    def get_serializer_class(self):
+        if self.request.method == 'PUT':
+            return ImageDestroySerializer
+        elif self.request.method == 'POST':
+            return ImageCreateSerializer
 
     def create(self, request):
-        #TODO comprobar que el product pertenece al request.user
-        serializer = ImageCreateSerializer(data=request.data)
+        serializer = ImageCreateSerializer(data=request.data, context={'user': request.user})
         if serializer.is_valid():
-            # recuperamos el producto
-            product = get_object_or_404(Product, pk=request.data.get('productId'))
-            # creamos el objeto image
-            serializer.save(product=product, url=request.data.get('url'))
-            # devolvemos el producto completo
-            response_serializer = ProductListSerializer(product)
-            return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+            serializer.save()
+            return Response(status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def retrieve(self, request, pk):
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
+        product = get_object_or_404(Product, pk=pk)
+        self.check_object_permissions(request, product)  # compruebo si el usuario autenticado puede hacer GET en este product
+        serializer = ProductListSerializer(product)
+        return Response(data=serializer.get_images(product),status=status.HTTP_200_OK)
 
     def update(self, request, pk):
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
+        serializer = ImageDestroySerializer(data=request.data, context={'user': request.user})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def destroy(self, request, pk):
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def list(self, request):
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
