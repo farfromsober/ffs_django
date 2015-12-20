@@ -17,6 +17,7 @@ from django.conf.urls import include, url
 from django.contrib import admin
 from users import api_urls as users_api_urls
 from products import api_urls as products_api_urls
+from images import api_urls as images_api_urls
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
@@ -28,4 +29,7 @@ urlpatterns = [
 
     # Products URLs
     url(r'api/', include(products_api_urls)),
+
+    # Images URLs
+    url(r'api/', include(images_api_urls)),
 ]
