@@ -34,14 +34,17 @@ class ImageViewSet(GenericViewSet):
 
     def retrieve(self, request, pk):
         product = get_object_or_404(Product, pk=pk)
-        self.check_object_permissions(request, product)  # compruebo si el usuario autenticado puede hacer GET en este product
+        # compruebo si el usuario autenticado puede hacer GET en este product
+        self.check_object_permissions(request, product)
         serializer = ProductListSerializer(product)
         return Response(data=serializer.get_images(product),status=status.HTTP_200_OK)
 
     def update(self, request, pk):
         serializer = ImageDestroySerializer(data=request.data, context={'user': request.user})
         if serializer.is_valid():
-            serializer.save()
+            url = request.data.get('url')
+            image = Image.objects.get(url=url)
+            image.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

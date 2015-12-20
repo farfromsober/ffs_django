@@ -61,7 +61,4 @@ class ImageDestroySerializer(serializers.Serializer):
 
         return value
 
-    def create(self, validated_data):
-        image = Image.objects.get(url=validated_data.get('url'))
-        image.delete()
 
