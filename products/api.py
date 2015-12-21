@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from .permissions import ProductPermission
-from .filters import ProductsFilter
+from .filters import ProductsFilter, filter_with_localization
 from .settings import DEFAULT_CATEGORY_INDEX
 from rest_framework import status
 from rest_framework.generics import get_object_or_404
@@ -21,7 +21,8 @@ class ProductViewSet(GenericViewSet):
 
     def list(self, request):
         products = self.filter_class(request.query_params, queryset=self.queryset)
-        serializer = ProductListSerializer(products.qs, many=True)
+        products = filter_with_localization(request.query_params, products.qs)
+        serializer = ProductListSerializer(products, many=True)
         return Response(serializer.data)
 
     def create(self, request):
