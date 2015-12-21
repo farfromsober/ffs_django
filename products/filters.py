@@ -8,7 +8,8 @@ class ProductsFilter(django_filters.FilterSet):
     category = django_filters.NumberFilter(name="category__index")
     name = django_filters.CharFilter(name='name', lookup_type='icontains')
     seller = django_filters.CharFilter(name='seller__user__username')
+    selling = django_filters.BooleanFilter(name='selling')
 
     class Meta:
         model = Product
-        fields = ('category', 'name', 'seller')
+        fields = ('category', 'name', 'seller', 'selling')
