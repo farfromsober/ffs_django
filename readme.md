@@ -63,9 +63,9 @@ Esto es debido a que con el gestor de paquetes de pyCharm a veces no te deja esp
 Seguir pasos descritos en vídeo de preparación subido a drive.
 
 ###Actualización del servidor de producción
-1. Conectar a la máquina de azure por ssh.
+1. Conectar a la máquina de azure por ssh. ```ssh azureuser@forsale.cloudapp.net```
 2. Nos movemos a la carpeta de la app. ```cd /var/www/ffs_django/app/```
-3. Ejecutamos el script de actualización 'update.sh'.
+3. Ejecutamos el script de actualización ```sudo ./update.sh```
 
 ## Consideraciones generales
 * Nunca ejecutar el makemigrations en el servidor, las migraciones se generan en local, viajan con el repositorio y se aplican en el servidor con el script de actualización.
