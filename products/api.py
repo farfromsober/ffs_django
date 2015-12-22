@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from .permissions import ProductPermission
-from .filters import ProductsFilter, filter_with_localization
+from .filters import ProductsFilter, filter_with_localization, add_distance
 from .settings import DEFAULT_CATEGORY_INDEX
 from rest_framework import status
 from rest_framework.generics import get_object_or_404
@@ -23,6 +23,8 @@ class ProductViewSet(GenericViewSet):
         products = self.filter_class(request.query_params, queryset=self.queryset)
         products = filter_with_localization(request.query_params, products.qs)
         serializer = ProductListSerializer(products, many=True)
+        # añadimos la distancia a mano
+        add_distance(request.query_params, serializer.data)
         return Response(serializer.data)
 
     def create(self, request):
