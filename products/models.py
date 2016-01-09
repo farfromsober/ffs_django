@@ -50,11 +50,10 @@ class SavedSearch(models.Model):
 class Transaction(models.Model):
 
     product = models.ForeignKey(Product)
-    seller = models.ForeignKey(Profile, related_name='seller')
     buyer = models.ForeignKey(Profile, related_name='buyer')
     date = models.DateTimeField(auto_now_add=True)
 
     def __unicode__(self):
-        return self.product.name + u': ' + self.seller.user.username + u' -> ' + self.buyer.user.username
+        return self.product.name + u': ' + u' -> ' + self.buyer.user.username
 
-# TODO: Controlar que seller y buyer no son iguales
+# TODO: Controlar que product.seller y buyer NO son iguales

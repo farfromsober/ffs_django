@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from rest_framework.views import APIView
+
 from .permissions import ProductPermission
 from .filters import ProductsFilter
 from .settings import DEFAULT_CATEGORY_INDEX
@@ -6,8 +8,9 @@ from rest_framework import status
 from rest_framework.generics import get_object_or_404
 from rest_framework.viewsets import GenericViewSet
 from users.models import Profile
-from .serializers import ProductSerializer, ProductCreateSerializer, ProductListSerializer, ProductUpdateSerializer
-from .models import Product, Category
+from .serializers import ProductSerializer, ProductCreateSerializer, ProductListSerializer, ProductUpdateSerializer, \
+    TransactionSerializer
+from .models import Product, Category, Transaction
 from rest_framework.response import Response
 
 
@@ -83,3 +86,30 @@ class ProductViewSet(GenericViewSet):
     # def get_categories_queryset(self, request):
     #     categories = Category.objects.order_by('index')
     #     return categories
+
+class TransactionViewSet(GenericViewSet):
+
+    queryset = Transaction.objects.order_by('-date', 'id')
+    # pagination_class = PageNumberPagination
+    serializer_class = TransactionSerializer
+    #permission_classes = (ProductPermission,)
+    #filter_class = ProductsFilter
+
+    def list(self, request):
+        return Response(status=status.HTTP_200_OK)
+
+    def create(self, request):
+        return Response(status=status.HTTP_200_OK)
+
+
+    def retrieve(self, request, pk):
+        return Response(status=status.HTTP_200_OK)
+
+    def update(self, request, pk):
+        return Response(status=status.HTTP_200_OK)
+
+
+    def destroy(self, request, pk):
+        return Response(status=status.HTTP_200_OK)
+
+

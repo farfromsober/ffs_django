@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from rest_framework import serializers
-from models import Product, Category
+from models import Product, Category, Transaction
 from rest_framework.relations import PrimaryKeyRelatedField
 from users.serializers import ProfileSerializer
 
@@ -58,3 +58,13 @@ class ProductUpdateSerializer(ProductSerializer):
 
     class Meta(ProductSerializer.Meta):
         fields = ('name', 'description', 'price', 'category', 'selling')
+
+
+class TransactionSerializer(serializers.ModelSerializer):
+
+    product = ProductSerializer()
+    buyer = ProfileSerializer()
+
+    class Meta:
+        model = Transaction
+
