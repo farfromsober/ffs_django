@@ -13,11 +13,10 @@ class UserPermission(BasePermission):
         elif request.user.is_superuser:
             return True
 
-        elif view.action == 'list':
-            return True
         # para los GET al detalle, se delega la decision a has_object_permissions
-        elif view.action in ['retrieve', 'update', 'destroy']:
+        elif view.action in ['list', 'retrieve', 'update', 'destroy', 'metadata']:
             return True
+
         else:
             # otros GET a /api/1.0/users/ no se permiten
             return False
