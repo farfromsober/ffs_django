@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
-from rest_framework.views import APIView
 
-from .permissions import ProductPermission
-from .filters import ProductsFilter
+from .permissions import ProductPermission, TransactionPermission
+from .filters import ProductsFilter, TransactionsFilter
 from .settings import DEFAULT_CATEGORY_INDEX
 from rest_framework import status
 from rest_framework.generics import get_object_or_404
 from rest_framework.viewsets import GenericViewSet
 from users.models import Profile
 from .serializers import ProductSerializer, ProductCreateSerializer, ProductListSerializer, ProductUpdateSerializer, \
-    TransactionSerializer
+    TransactionSerializer, TransactionCreateSerializer, TransactionListSerializer
 from .models import Product, Category, Transaction
 from rest_framework.response import Response
 
@@ -73,43 +72,89 @@ class ProductViewSet(GenericViewSet):
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
-    # def get_products_queryset(self, request):
-    #     # gestion del filtro por categorias
-    #     category_index = request.query_params.get('category', None)
-    #     if category_index is not None:
-    #         category = get_object_or_404(Category, index=category_index)
-    #         products = Product.objects.prefetch_related('images').filter(category=category).order_by('-published_date', 'id')
-    #     else:
-    #         products = Product.objects.prefetch_related('images').order_by('-published_date', 'id')
-    #     return products
-
-    # def get_categories_queryset(self, request):
-    #     categories = Category.objects.order_by('index')
-    #     return categories
 
 class TransactionViewSet(GenericViewSet):
 
     queryset = Transaction.objects.order_by('-date', 'id')
-    # pagination_class = PageNumberPagination
-    serializer_class = TransactionSerializer
-    #permission_classes = (ProductPermission,)
-    #filter_class = ProductsFilter
+    #pagination_class = PageNumberPagination
+    permission_classes = (TransactionPermission,)
+    filter_class = TransactionsFilter
+
+    # sobreescribimos este método para especificar distintos serializers
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return TransactionSerializer
+        elif self.request.method == 'POST':
+            return TransactionCreateSerializer
 
     def list(self, request):
-        return Response(status=status.HTTP_200_OK)
+        transactions = self.filter_class(request.query_params, queryset=self.queryset)
+        serializer = TransactionListSerializer(transactions.qs, many=True)
+        return Response(serializer.data)
 
     def create(self, request):
-        return Response(status=status.HTTP_200_OK)
+        serializer = TransactionCreateSerializer(data=request.data)
+        if serializer.is_valid():
+            # Obtenemos el buyer y el product para crear la transaction
+            buyer = Profile.objects.get(pk=request.data.get('buyerId'))
+            product = Product.objects.get(pk=request.data.get('productId'))
 
+            # Creamos la transaction
+            transaction = Transaction.objects.create(product=product, buyer=buyer)
+
+            # Pero no la guardaremos hasta chequear los permisos
+            self.check_object_permissions(request, transaction)
+
+            if product.selling:
+                # volvemos a poner el producto a la venta
+                product.selling = 0
+                product.save()
+                # actualizamos el contador de sales
+                seller = product.seller
+                new_sales = seller.sales - 1
+                seller.sales = new_sales
+                seller.save()
+
+            else: # no se puede crear un transaction con un producto que no está en venta
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+
+            # Si OK, la guardamos y devolvemos un '201'
+            transaction.save()
+            return Response(status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def retrieve(self, request, pk):
-        return Response(status=status.HTTP_200_OK)
+
+        transaction = get_object_or_404(Transaction, pk=pk)
+
+        # Chequeamos los permisos
+        self.check_object_permissions(request, transaction)
+
+        serializer = TransactionSerializer(transaction)
+        return Response(serializer.data)
 
     def update(self, request, pk):
-        return Response(status=status.HTTP_200_OK)
-
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def destroy(self, request, pk):
-        return Response(status=status.HTTP_200_OK)
+        transaction = get_object_or_404(Transaction, pk=pk)
+
+        # Chequeamos los permisos
+        self.check_object_permissions(request, transaction)
+
+        product = transaction.product
+        seller = transaction.product.seller
+        # volvemos a poner el producto a la venta
+        product.selling = 1
+        product.save()
+        # actualizamos el contador de sales
+        new_sales = seller.sales + 1
+        seller.sales = new_sales
+        seller.save()
+
+        # Si OK, la destruimos y devolvemos un '204'
+        transaction.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 

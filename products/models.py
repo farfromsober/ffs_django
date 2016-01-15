@@ -54,6 +54,6 @@ class Transaction(models.Model):
     date = models.DateTimeField(auto_now_add=True)
 
     def __unicode__(self):
-        return self.product.name + u': ' + u' -> ' + self.buyer.user.username
+        return u'[' + str(self.id) + u'] ' + self.product.name + u' of '+ self.product.seller.user.username + u' sold to ' + self.buyer.user.username
 
 # TODO: Controlar que product.seller y buyer NO son iguales
