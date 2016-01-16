@@ -84,8 +84,7 @@ class ProductsAPITestCase(APITestCase):
 
     def test_list_products_filtered_by_category(self):
         """
-        Prueba que se devuelva completa la lista de productos
-        :return:
+        Prueba que se devuelva la lista de productos filtrada por category
         """
         self._require_login(self.username, self.password)
         response = self.client.get('/api/1.0/products/?category=1')
@@ -94,10 +93,42 @@ class ProductsAPITestCase(APITestCase):
         self.assertEqual(response.data[0]['name'], 'Producto 2')
         self.assertEqual(response.data[0]['description'], 'Descripcion producto 2')
 
+    def test_list_products_filtered_by_keyword(self):
+        """
+        Prueba que se devuelva la lista de productos filtrada por keywords
+        """
+        self._require_login(self.username, self.password)
+        response = self.client.get('/api/1.0/products/?name=1')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data.__len__(), 1)
+        self.assertEqual(response.data[0]['name'], 'Producto 1')
+        self.assertEqual(response.data[0]['description'], 'Descripcion producto 1')
+
+    def test_list_products_filtered_by_seller_name(self):
+        """
+        Prueba que se devuelva la lista de productos filtrada por nombre de vendedor
+        """
+        self._require_login(self.username, self.password)
+        response = self.client.get('/api/1.0/products/?seller=testuser1')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data.__len__(), 1)
+        self.assertEqual(response.data[0]['name'], 'Producto 1')
+        self.assertEqual(response.data[0]['description'], 'Descripcion producto 1')
+
+    def test_list_products_filtered_by_selling_status(self):
+        """
+        Prueba que se devuelva la lista de productos filtrada por estado del producto
+        """
+        self._require_login(self.username, self.password)
+        response = self.client.get('/api/1.0/products/?selling=0')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data.__len__(), 1)
+        self.assertEqual(response.data[0]['name'], 'Producto 2')
+        self.assertEqual(response.data[0]['description'], 'Descripcion producto 2')
+
     def test_get_product_without_authentication(self):
         """
         Prueba que no se devuelve un detalle de producto si no se está autenticado
-        :return:
         """
         response = self.client.get('/api/1.0/products/1/')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -105,7 +136,6 @@ class ProductsAPITestCase(APITestCase):
     def test_get_non_existing_product(self):
         """
         Prueba que no se devuelve un detalle de producto si éste no existe
-        :return:
         """
         self._require_login(self.username, self.password)
         response = self.client.get('/api/1.0/products/3/')
