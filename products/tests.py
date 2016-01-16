@@ -97,7 +97,7 @@ class ProductsAPITestCase(APITestCase):
         """
         Prueba que se devuelva la lista de productos filtrada por keywords
         """
-        self._require_login(self.username, self.password)
+        self._require_login(self.user1)
         response = self.client.get('/api/1.0/products/?name=1')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data.__len__(), 1)
@@ -108,7 +108,7 @@ class ProductsAPITestCase(APITestCase):
         """
         Prueba que se devuelva la lista de productos filtrada por nombre de vendedor
         """
-        self._require_login(self.username, self.password)
+        self._require_login(self.user1)
         response = self.client.get('/api/1.0/products/?seller=testuser1')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data.__len__(), 1)
@@ -119,8 +119,8 @@ class ProductsAPITestCase(APITestCase):
         """
         Prueba que se devuelva la lista de productos filtrada por estado del producto
         """
-        self._require_login(self.username, self.password)
-        response = self.client.get('/api/1.0/products/?selling=0')
+        self._require_login(self.user1)
+        response = self.client.get('/api/1.0/products/?selling=3')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data.__len__(), 1)
         self.assertEqual(response.data[0]['name'], 'Producto 2')
