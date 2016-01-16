@@ -99,8 +99,8 @@ class TransactionViewSet(GenericViewSet):
             buyer = Profile.objects.get(pk=request.data.get('buyerId'))
             product = Product.objects.get(pk=request.data.get('productId'))
 
-            # Creamos la transaction
-            transaction = Transaction.objects.create(product=product, buyer=buyer)
+            # Creamos una instancia transaction
+            transaction = Transaction(product=product, buyer=buyer)
 
             # Pero no la guardaremos hasta chequear los permisos
             self.check_object_permissions(request, transaction)
