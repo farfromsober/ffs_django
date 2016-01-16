@@ -35,7 +35,7 @@ class ProductViewSet(GenericViewSet):
             category = get_object_or_404(Category, index=request.data.get('category', dict())
                                                                      .get('index', DEFAULT_CATEGORY_INDEX))
 
-            new_sales = request.user.profile.sales + 1
+            new_sales = int(request.user.profile.sales) + 1
             request.user.profile.sales = new_sales
             request.user.profile.save()
             product = serializer.save(seller=request.user.profile, category=category)
@@ -67,7 +67,7 @@ class ProductViewSet(GenericViewSet):
         product = get_object_or_404(Product, pk=pk)
         self.check_object_permissions(request, product)  # compruebo si el usuario autenticado puede hacer DELETE en este product
         if product.selling:
-            new_sales = request.user.profile.sales - 1
+            new_sales = int(request.user.profile.sales) - 1
             request.user.profile.sales = new_sales
             request.user.profile.save()
             product.delete()
