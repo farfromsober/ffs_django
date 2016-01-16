@@ -24,10 +24,6 @@ class ProductsFilter(django_filters.FilterSet):
         model = Product
         fields = ('category', 'name', 'seller', 'selling')
 
-
-
-
-
 def get_point_and_distance(params):
     """
     :param params: get parameters de la request
