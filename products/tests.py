@@ -60,8 +60,8 @@ class ProductsAPITestCase(APITestCase):
         self.product1.save()
         self.product2.save()
 
-    def _require_login(self, username, password):
-        self.client.login(username=username, password=password)
+    def _require_login(self, user):
+        self.client.force_authenticate(user)
 
     def test_list_products_without_authentication(self):
         """
@@ -76,7 +76,7 @@ class ProductsAPITestCase(APITestCase):
         Prueba que se devuelva completa la lista de productos
         :return:
         """
-        self._require_login(self.username, self.password)
+        self._require_login(self.user1)
         response = self.client.get('/api/1.0/products/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data[0]['name'], 'Producto 2')
@@ -84,11 +84,43 @@ class ProductsAPITestCase(APITestCase):
 
     def test_list_products_filtered_by_category(self):
         """
-        Prueba que se devuelva completa la lista de productos
-        :return:
+        Prueba que se devuelva la lista de productos filtrada por category
         """
-        self._require_login(self.username, self.password)
+        self._require_login(self.user1)
         response = self.client.get('/api/1.0/products/?category=1')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data.__len__(), 1)
+        self.assertEqual(response.data[0]['name'], 'Producto 2')
+        self.assertEqual(response.data[0]['description'], 'Descripcion producto 2')
+
+    def test_list_products_filtered_by_keyword(self):
+        """
+        Prueba que se devuelva la lista de productos filtrada por keywords
+        """
+        self._require_login(self.user1)
+        response = self.client.get('/api/1.0/products/?name=1')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data.__len__(), 1)
+        self.assertEqual(response.data[0]['name'], 'Producto 1')
+        self.assertEqual(response.data[0]['description'], 'Descripcion producto 1')
+
+    def test_list_products_filtered_by_seller_name(self):
+        """
+        Prueba que se devuelva la lista de productos filtrada por nombre de vendedor
+        """
+        self._require_login(self.user1)
+        response = self.client.get('/api/1.0/products/?seller=testuser1')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data.__len__(), 1)
+        self.assertEqual(response.data[0]['name'], 'Producto 1')
+        self.assertEqual(response.data[0]['description'], 'Descripcion producto 1')
+
+    def test_list_products_filtered_by_selling_status(self):
+        """
+        Prueba que se devuelva la lista de productos filtrada por estado del producto
+        """
+        self._require_login(self.user1)
+        response = self.client.get('/api/1.0/products/?selling=3')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data.__len__(), 1)
         self.assertEqual(response.data[0]['name'], 'Producto 2')
@@ -97,7 +129,6 @@ class ProductsAPITestCase(APITestCase):
     def test_get_product_without_authentication(self):
         """
         Prueba que no se devuelve un detalle de producto si no se está autenticado
-        :return:
         """
         response = self.client.get('/api/1.0/products/1/')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -105,9 +136,8 @@ class ProductsAPITestCase(APITestCase):
     def test_get_non_existing_product(self):
         """
         Prueba que no se devuelve un detalle de producto si éste no existe
-        :return:
         """
-        self._require_login(self.username, self.password)
+        self._require_login(self.user1)
         response = self.client.get('/api/1.0/products/3/')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
@@ -116,7 +146,7 @@ class ProductsAPITestCase(APITestCase):
         Prueba que se devuelva uno de los productos
         :return:
         """
-        self._require_login(self.username, self.password)
+        self._require_login(self.user1)
         response = self.client.get('/api/1.0/products/1/')
         self.assertEqual(response.data['name'], 'Producto 1')
         self.assertEqual(response.data['description'], 'Descripcion producto 1')
@@ -140,7 +170,7 @@ class ProductsAPITestCase(APITestCase):
         Prueba que no se elimine un producto que no esté en venta
         :return:
         """
-        self._require_login(self.username, self.password)
+        self._require_login(self.user1)
         response = self.client.delete('/api/1.0/products/2/')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -149,7 +179,7 @@ class ProductsAPITestCase(APITestCase):
         Prueba que no se elimine un producto del cual no seamos el vendedor
         :return:
         """
-        self._require_login(self.username, self.password)
+        self._require_login(self.user1)
         response = self.client.delete('/api/1.0/products/2/')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -158,7 +188,7 @@ class ProductsAPITestCase(APITestCase):
         Prueba que se elimine un producto
         :return:
         """
-        self._require_login(self.username, self.password)
+        self._require_login(self.user1)
         profile1 = Profile.objects.get(user=self.user1)
         initial_sales = profile1.sales
         response = self.client.delete('/api/1.0/products/1/')
@@ -193,7 +223,7 @@ class ProductsAPITestCase(APITestCase):
         """
         initial_sales = self.profile1.sales
 
-        self._require_login(self.username, self.password)
+        self._require_login(self.user1)
         post_data = {
             "category": {
                 "name": "deportes",
@@ -258,7 +288,7 @@ class ProductsAPITestCase(APITestCase):
         Prueba que se agregue un producto que no existe
         :return:
         """
-        self._require_login(self.username, self.password)
+        self._require_login(self.user1)
         post_data = {
             "category": {
                 "name": "deportes",
@@ -283,7 +313,7 @@ class ProductsAPITestCase(APITestCase):
         Prueba que se agregue un producto que no existe
         :return:
         """
-        self._require_login(self.username2, self.password2)
+        self._require_login(self.user2)
         post_data = {
             "category": {
                 "name": "general",

@@ -6,7 +6,7 @@ __author__ = 'gloria'
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 from users.permissions import UserPermission
-from users.serializers import ProfileSerializer, ProfileUpdateSerializer
+from users.serializers import ProfileSerializer, ProfileUpdateSerializer, ProfileListSerializer
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 
@@ -23,7 +23,7 @@ class UserViewSet(GenericViewSet):
 
     def list(self, request):
         users = Profile.objects.all()
-        serializer = ProfileSerializer(users, many=True)
+        serializer = ProfileListSerializer(users, many=True)
         return Response(serializer.data)
 
     def create(self, request):
@@ -61,7 +61,6 @@ class UserViewSet(GenericViewSet):
         self.check_object_permissions(request, user)
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
 
 
 class LoginAPIView(APIView):
