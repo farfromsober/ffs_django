@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
+from rest_framework.views import APIView
+
 from .permissions import ProductPermission
 from .filters import ProductsFilter, TransactionsFilter, filter_with_localization, add_distance
 from .permissions import ProductPermission, TransactionPermission
@@ -159,5 +162,24 @@ class TransactionViewSet(GenericViewSet):
         # Si OK, la destruimos y devolvemos un '204'
         transaction.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+class BuyedAPIView(APIView):
+
+    def get(self, request, format=None):
+        """
+        Return a list of buyed products for current user.
+        """
+
+        if request.user is not None and request.user.is_active:
+
+            all_transactions = Transaction.objects.filter(buyer__user=request.user)
+            products = [transaction.product for transaction in all_transactions]
+            serializer = ProductListSerializer(products, many=True)
+
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        else:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
 
 
