@@ -163,7 +163,7 @@ class TransactionViewSet(GenericViewSet):
         transaction.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-class BuyedAPIView(APIView):
+class BoughtAPIView(APIView):
 
     def get(self, request, format=None):
         """
