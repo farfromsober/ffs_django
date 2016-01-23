@@ -7,7 +7,7 @@ from .models import Product, Transaction, Category, SavedSearch
 class ProductAdmin(admin.ModelAdmin):
 
     # columnas que se muestran en el listado
-    list_display = ['name', 'published_date', 'seller', 'category', 'price']
+    list_display = ['name', 'published_date', 'seller', 'category', 'price', 'selling']
 
     # para filtrar en la derecha
     list_filter = ['category']

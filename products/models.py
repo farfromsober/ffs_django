@@ -17,7 +17,7 @@ class Category(models.Model):
     index = models.PositiveIntegerField(unique=True)
 
     def __unicode__(self):
-        return self.name
+        return u'[' + str(self.index) + u'] ' + self.name
 
 class Product(models.Model):
 
@@ -31,7 +31,7 @@ class Product(models.Model):
     category = models.ForeignKey(Category, null=True, on_delete=models.SET_NULL)
 
     def __unicode__(self):
-        return self.name
+        return u'[' + str(self.id) + u'] ' + self.name
 
 # TODO: Actualizar el número de productos vendidos del seller cuando cambie selling
 
