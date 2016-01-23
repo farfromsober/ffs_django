@@ -22,6 +22,6 @@ class Profile(models.Model):
     full_name = property(lambda Profile: u'%s %s' % (Profile.user.first_name, Profile.user.last_name))
 
     def __unicode__(self):
-        return self.user.username + ' - ' + self.full_name
+        return u'[' + str(self.id) + u'] ' + self.user.username
 
 # TODO: Añadirle una latitud y longitud si no nos viene dada
