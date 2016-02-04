@@ -19,6 +19,8 @@ class Category(models.Model):
     def __unicode__(self):
         return u'[' + str(self.index) + u'] ' + self.name
 
+
+
 class Product(models.Model):
 
     name = models.CharField(max_length=PRODUCT_NAME_MAX_LENGTH)
@@ -33,7 +35,8 @@ class Product(models.Model):
     def __unicode__(self):
         return u'[' + str(self.id) + u'] ' + self.name
 
-# TODO: Actualizar el número de productos vendidos del seller cuando cambie selling
+
+
 
 class SavedSearch(models.Model):
 
@@ -45,7 +48,8 @@ class SavedSearch(models.Model):
     def __unicode__(self):
         return self.query
 
-# TODO: Decidir si vamos a pasar a minúsculas y quitar los caracteres especiales en el pre-save
+
+
 
 class Transaction(models.Model):
 
@@ -55,5 +59,3 @@ class Transaction(models.Model):
 
     def __unicode__(self):
         return u'[' + str(self.id) + u'] ' + self.product.name + u' of '+ self.product.seller.user.username + u' sold to ' + self.buyer.user.username
-
-# TODO: Controlar que product.seller y buyer NO son iguales

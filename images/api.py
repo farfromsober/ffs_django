@@ -8,7 +8,7 @@ from rest_framework.generics import get_object_or_404
 from images.permissions import ImagePermission
 from images.serializers import ImageCreateSerializer, ImageDestroySerializer
 from products.models import Product
-from products.serializers import ProductListSerializer
+from products.serializers import ProductSerializer
 from .models import Image
 
 
@@ -36,7 +36,7 @@ class ImageViewSet(GenericViewSet):
         product = get_object_or_404(Product, pk=pk)
         # compruebo si el usuario autenticado puede hacer GET en este product
         self.check_object_permissions(request, product)
-        serializer = ProductListSerializer(product)
+        serializer = ProductSerializer(product)
         return Response(data=serializer.get_images(product),status=status.HTTP_200_OK)
 
     def update(self, request, pk):

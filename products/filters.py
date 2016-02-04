@@ -13,6 +13,9 @@ class TransactionsFilter(django_filters.FilterSet):
         model = Transaction
         fields = ('sellerId',)
 
+
+
+
 class ProductsFilter(django_filters.FilterSet):
 
     category = django_filters.NumberFilter(name="category__index")

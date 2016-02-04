@@ -35,19 +35,11 @@ class ProductSerializer(serializers.ModelSerializer):
     id = StringToFloatField()
     images = serializers.SerializerMethodField()  # utiliza el metodo "get_images"
 
-    # TODO: enviar array de imagenes de un producto
-
     class Meta:
         model = Product
 
     def get_images(self, obj):
         return obj.images.all().values_list('url', flat=True)
-
-
-class ProductListSerializer(ProductSerializer):
-
-    class Meta:
-        model = Product
 
 
 class ProductCreateSerializer(ProductSerializer):

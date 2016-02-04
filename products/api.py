@@ -10,10 +10,13 @@ from rest_framework import status
 from rest_framework.generics import get_object_or_404
 from rest_framework.viewsets import GenericViewSet
 from users.models import Profile
-from .serializers import ProductSerializer, ProductCreateSerializer, ProductListSerializer, ProductUpdateSerializer, \
+from .serializers import ProductSerializer, ProductCreateSerializer, ProductUpdateSerializer, \
     TransactionSerializer, TransactionCreateSerializer, TransactionListSerializer
 from .models import Product, Category, Transaction
 from rest_framework.response import Response
+
+
+
 
 
 class ProductViewSet(GenericViewSet):
@@ -27,7 +30,7 @@ class ProductViewSet(GenericViewSet):
     def list(self, request):
         products = self.filter_class(request.query_params, queryset=self.queryset)
         products = filter_with_localization(request.query_params, products.qs)
-        serializer = ProductListSerializer(products, many=True)
+        serializer = ProductSerializer(products, many=True)
         # añadimos la distancia a mano
         add_distance(request.query_params, serializer.data)
         return Response(serializer.data)
@@ -38,7 +41,7 @@ class ProductViewSet(GenericViewSet):
             category = get_object_or_404(Category, index=request.data.get('category', dict())
                                                                      .get('index', DEFAULT_CATEGORY_INDEX))
             product = serializer.save(seller=request.user.profile, category=category)
-            response_serializer = ProductListSerializer(product)
+            response_serializer = ProductSerializer(product)
             return Response(response_serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -46,7 +49,7 @@ class ProductViewSet(GenericViewSet):
     def retrieve(self, request, pk):
         product = get_object_or_404(Product, pk=pk)
         self.check_object_permissions(request, product)  # compruebo si el usuario autenticado puede hacer GET en este product
-        serializer = ProductListSerializer(product)
+        serializer = ProductSerializer(product)
         return Response(serializer.data)
 
     def update(self, request, pk):
@@ -57,7 +60,7 @@ class ProductViewSet(GenericViewSet):
             category = get_object_or_404(Category, index=request.data.get('category', dict()).get('index'))
             seller = get_object_or_404(Profile, user=request.user)
             product = serializer.save(seller=seller, category=category)
-            response_serializer = ProductListSerializer(product)
+            response_serializer = ProductSerializer(product)
             return Response(response_serializer.data, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -70,6 +73,11 @@ class ProductViewSet(GenericViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+
 
 
 class TransactionViewSet(GenericViewSet):
@@ -168,7 +176,7 @@ class BoughtAPIView(APIView):
 
             all_transactions = Transaction.objects.filter(buyer__user=request.user)
             products = [transaction.product for transaction in all_transactions]
-            serializer = ProductListSerializer(products, many=True)
+            serializer = ProductSerializer(products, many=True)
 
             return Response(serializer.data, status=status.HTTP_200_OK)
 
