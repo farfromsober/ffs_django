@@ -233,3 +233,4 @@ Para incluir en las urls del proyecto agragar las siguientes líneas al archivo 
 ##	Test
 
 Para realizar pruebas del API usamos una clase que herede de **APITestCase**. Esto nos da acceso a los métodos assert y a un client con el cual podemos realizar peticiones http a los servicios para hacer las pruebas. En método **setUp** creamos los objetos necesarios para la prueba. Por cada prueba creamos un método cuyo nombre comience con **test**
+
